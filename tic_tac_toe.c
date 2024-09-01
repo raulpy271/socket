@@ -116,19 +116,65 @@ bool wins(game_t* game) {
     return false;
 }
 
+char whichPlayerWon(game_t* game){
+    if(!wins(game)) return 'N';
+    
+    enum Player player;
+    for (int i = 0; i < BOARD_H; i++) {
+        if (
+                (game->board[i][0] != MARK_EMPTY) && 
+                (game->board[i][0] == game->board[i][1]) && 
+                (game->board[i][1] == game->board[i][2]) 
+        ) {
+            player = game->board[i][0];
+        }
+    }
+    // check winner vertically 
+    for (int j = 0; j < BOARD_W; j++) {
+        if (
+                (game->board[0][j] != MARK_EMPTY) && 
+                (game->board[0][j] == game->board[1][j]) && 
+                (game->board[1][j] == game->board[2][j]) 
+        ) {
+             player = game->board[0][j];
+        }
+    }
+
+    // check winner on diagonal
+     if (
+                (game->board[0][0] != MARK_EMPTY) && 
+                (game->board[0][0] == game->board[1][1]) && 
+                (game->board[1][1] == game->board[2][2]) 
+
+                ||
+
+                (game->board[0][2] != MARK_EMPTY) && 
+                (game->board[0][2] == game->board[1][1]) && 
+                (game->board[1][1] == game->board[2][0]) 
+        ) {
+             player = game->board[1][1];
+        }
+
+        if(player == PLAYER_O) return '0';
+        
+        return 'X';
+}
+
 // test main
 // int main(int argc, char *argv[]) {
 //    game_t game;
 //    init_game(&game);
-//    play(&game, 0, 1);
 //    play(&game, 0, 0);
+//    play(&game, 0, 1);
 
-//    play(&game, 1, 0);
 //    play(&game, 1, 1);
+//    play(&game, 1, 0);
    
-//    play(&game, 2, 1);
 //    play(&game, 2, 2);
+//    play(&game, 2, 1);
 //    show_board(game.board);
+
 //    printf("Wins: %d\n", wins(&game)); 
+//    printf("Win: %c\n", whichPlayerWon(&game));
 // }
 
