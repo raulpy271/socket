@@ -23,6 +23,7 @@ typedef struct {
     enum Player turn;
 } game_t;
 
+
 char show_mark(enum Mark m) {
     switch (m) {
         case MARK_O: 
@@ -56,9 +57,11 @@ void init_game(game_t* game) {
 int play(game_t* game, int h, int w) {
     enum Mark mark;
     enum Player next_turn;
+
     if (game->board[h][w] != MARK_EMPTY) {
         return -1;
     }
+
     switch (game->turn) {
         case PLAYER_X:
             mark = MARK_X;
@@ -95,21 +98,37 @@ bool wins(game_t* game) {
             return true;
         }
     }
-    // TODO: check winner on diagonal
+
+    // check winner on diagonal
+     if (
+                (game->board[0][0] != MARK_EMPTY) && 
+                (game->board[0][0] == game->board[1][1]) && 
+                (game->board[1][1] == game->board[2][2]) 
+
+                ||
+
+                (game->board[0][2] != MARK_EMPTY) && 
+                (game->board[0][2] == game->board[1][1]) && 
+                (game->board[1][1] == game->board[2][0]) 
+        ) {
+            return true;
+        }
     return false;
 }
 
 // test main
-//int main(int argc, char *argv[]) {
+// int main(int argc, char *argv[]) {
 //    game_t game;
 //    init_game(&game);
-//    play(&game, 0, 0);
 //    play(&game, 0, 1);
+//    play(&game, 0, 0);
+
 //    play(&game, 1, 0);
 //    play(&game, 1, 1);
-//    play(&game, 2, 2);
+   
 //    play(&game, 2, 1);
+//    play(&game, 2, 2);
 //    show_board(game.board);
 //    printf("Wins: %d\n", wins(&game)); 
-//}
+// }
 
