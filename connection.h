@@ -1,4 +1,4 @@
 
-#define SOCKET_NAME "/tmp/0001.socket"
-#define BUFFER_SIZE 10
+#define SOCKET_ERR -1
+#define BUFFER_SIZE 8
 

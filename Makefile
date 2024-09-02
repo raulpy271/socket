@@ -1,8 +1,8 @@
 
-client.out: client.c connection.h
+client.out: client.c tic_tac_toe.c connection.h
 	gcc client.c -o client.out
 
-server.out: server.c connection.h
+server.out: server.c tic_tac_toe.c connection.h
 	gcc server.c -o server.out
 
 tic:

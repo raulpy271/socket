@@ -1,30 +1,39 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include "connection.h"
-
-#define SOCKET_ERR -1
+#include "tic_tac_toe.c"
 
 
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Não foi especificado a porta do servidor\n");
+        return 1;
+    }
+    uint16_t port = atoi(argv[1]);
+    int opt = 1;
+    printf("Subindo servidor com porta %d\n", port);
     int connected_sock;
-    char buffer[BUFFER_SIZE];
-    int sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-    if (sd == SOCKET_ERR) {
-        printf("Erro ao criar socket: %d\n", sd);
+    int sd = socket(AF_INET, SOCK_STREAM, 0);
+    int s_opt = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+    if (s_opt == SOCKET_ERR) {
+        printf("Erro ao criar socket: %d\n", s_opt);
         return 1;
     } 
     printf("Socket criado com sucesso: %d\n", sd);
 
-    struct sockaddr_un addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = INADDR_ANY;
     int ret = bind(sd, (struct sockaddr *) &addr, sizeof(addr));
     if (ret == SOCKET_ERR) {
         printf("Erro ao registrar endereço: %d\n", ret);
@@ -44,13 +53,12 @@ int main(int argc, char *argv[]) {
             break;
         }
         for (int j = 0; j < 10; j++) {
-            read(connected_sock, buffer, BUFFER_SIZE);
-            buffer[BUFFER_SIZE - 1] = 0;
-            printf("Texto recebido: %s\n", buffer);
+            msg_t msg;
+            read_play(connected_sock, &msg);
+            printf("Mensagem: %d-%d-%d-%d\n", msg.id, (int) msg.player, msg.h, msg.w);
         }
         close(connected_sock);
     }
 
     close(sd);
-    unlink(SOCKET_NAME);
 }

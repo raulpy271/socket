@@ -1,30 +1,38 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 #include "connection.h"
-
-#define SOCKET_ERR -1
+#include "tic_tac_toe.c"
 
 
 int main(int argc, char *argv[]) {
-    int connected_sock;
-    char buffer[BUFFER_SIZE];
-    int sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    if (argc < 3) {
+        printf("Deve ser especificado a porta e o ip do servidor\n");
+        return 1;
+    }
+    uint16_t port = atoi(argv[2]);
+    printf("Conectando com servidor %s na porta %d\n", argv[1], port);
+    int sd = socket(AF_INET, SOCK_STREAM, 0);
     if (sd == SOCKET_ERR) {
         printf("Erro ao criar socket: %d\n", sd);
         return 1;
     } 
     printf("Socket criado com sucesso: %d\n", sd);
 
-    struct sockaddr_un addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    inet_pton(AF_INET, argv[1], &addr.sin_addr);
+
     int ret = connect(sd, (struct sockaddr *) &addr, sizeof(addr));
     if (ret == SOCKET_ERR) {
         printf("Erro ao conectar com socket: %d\n", ret);
@@ -32,11 +40,13 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = 0; i < argc; i++) {
-        printf("Escrevendo no socket: %s\n", argv[i]);
-        ret = write(sd, argv[i], strlen(argv[i]) + 1);
-        if (ret == SOCKET_ERR) {
-            printf("Erro ao escrever no socket\n");
-        }
+        printf("Escrevendo no socket mensagem\n");
+        msg_t msg;
+        msg.id = 0;
+        msg.player = PLAYER_O;
+        msg.h = 1;
+        msg.w = 1;
+        send_play(sd, &msg);
     }
 
     close(sd);
