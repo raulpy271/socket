@@ -1,4 +1,5 @@
 
+#include <unistd.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -22,6 +23,13 @@ typedef struct {
     board_t board;
     enum Player turn;
 } game_t;
+
+typedef struct {
+    int id;
+    enum Player player;
+    int h;
+    int w;
+} msg_t;
 
 
 char show_mark(enum Mark m) {
@@ -158,6 +166,33 @@ char whichPlayerWon(game_t* game){
         if(player == PLAYER_O) return '0';
         
         return 'X';
+}
+
+void send_play(int sock, msg_t* msg) {
+    char buff[BUFFER_SIZE] = "_-_-_-_";
+    char player;
+    if (msg->player == PLAYER_X) {
+        player = 'x';
+    } else {
+        player = 'o';
+    }
+    sprintf(buff, "%d-%c-%d-%d", msg->id, player, msg->h, msg->w);
+    int ret = write(sock, buff, BUFFER_SIZE);
+    if (ret == SOCKET_ERR) {
+        printf("Erro ao escrever no socket\n");
+    }
+}
+
+void read_play(int sock, msg_t* msg) {
+    char player;
+    char buff[BUFFER_SIZE];
+    read(sock, buff, BUFFER_SIZE);
+    sscanf(buff, "%d-%c-%d-%d", &msg->id, &player, &msg->h, &msg->w);
+    if (player == 'x') {
+        msg->player = PLAYER_X;
+    } else {
+        msg->player = PLAYER_O;
+    }
 }
 
 // test main
