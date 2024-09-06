@@ -51,32 +51,31 @@ int main(int argc, char *argv[])
     game_t game;
     init_game(&game);
 
+    limpar_console();
+    show_board(game.board);
     while (true)
     {   
-        // Enviar Jogada
+        // Receber Jogada
+        printf("\nAguardando jogada do adversario X...\n");
+        read_play(sd, &msg);
+        play(&game, msg.h, msg.w);
         limpar_console();
         show_board(game.board);
+
+        // Enviar Jogada
         printf("Digite a posição X-Y: ");
         scanf("%d-%d", &height, &width);
         if(validateInput(height, width) == 0){ return -1;}
 
-        limpar_console();
-        printf("Escrevendo no socket mensagem\n");
         msg.player = PLAYER_O;
         msg.id = countJogadas++;
         msg.h = height;
         msg.w = width;
         send_play(sd, &msg);
         play(&game, msg.h, msg.w);
+        limpar_console();
         show_board(game.board);
 
-        // Receber Jogada
-        printf("\nAguardando jogada do adversario O...\n");
-        read_play(sd, &msg);
-        printf("Mensagem recebida: %d-%d-%d-%d\n", msg.id, (int)msg.player, msg.h, msg.w);
-        limpar_console();
-        play(&game, msg.h, msg.w);
-        show_board(game.board);
     }
     close(sd);
 }

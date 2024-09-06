@@ -67,14 +67,6 @@ int main(int argc, char *argv[])
     show_board(game.board);
     while (true)
     {
-        printf("\nAguardando jogada do adversario X...\n");
-
-        // Receber Jogada
-        read_play(connected_sock, &msg);
-        printf("Mensagem: %d-%d-%d-%d\n", msg.id, (int)msg.player, msg.h, msg.w);
-        limpar_console();
-        play(&game, msg.h, msg.w);
-        show_board(game.board);
 
         // Enviar Jogada
         printf("Digite a posição X-Y: ");
@@ -87,9 +79,15 @@ int main(int argc, char *argv[])
         msg.player = PLAYER_X;
         msg.h = height;
         msg.w = width;
-        send_play(connected_sock, &msg);
-        limpar_console();
         play(&game, msg.h, msg.w);
+        limpar_console();
+        show_board(game.board);
+        send_play(connected_sock, &msg);
+
+        printf("\nAguardando jogada do adversario O...\n");
+        read_play(connected_sock, &msg);
+        play(&game, msg.h, msg.w);
+        limpar_console();
         show_board(game.board);
     }
     close(connected_sock);
