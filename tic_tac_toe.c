@@ -2,7 +2,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdio.h>
-
+#include <stdlib.h>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 #define BOARD_W 3
 #define BOARD_H 3
 
@@ -176,11 +179,20 @@ void send_play(int sock, msg_t* msg) {
     } else {
         player = 'o';
     }
+
     sprintf(buff, "%d-%c-%d-%d", msg->id, player, msg->h, msg->w);
     int ret = write(sock, buff, BUFFER_SIZE);
     if (ret == SOCKET_ERR) {
         printf("Erro ao escrever no socket\n");
     }
+}
+
+int validateInput(int h, int w){
+    if( h>=0 && h<=2) return 1;
+    if( w>=0 && w<=2) return 1;
+
+    printf("x E Y devem está entre 0-2");
+    return 0;
 }
 
 void read_play(int sock, msg_t* msg) {
@@ -193,6 +205,14 @@ void read_play(int sock, msg_t* msg) {
     } else {
         msg->player = PLAYER_O;
     }
+}
+
+void limpar_console() {
+    #ifdef _WIN32
+        system("cls"); 
+    #else
+        system("clear");
+    #endif
 }
 
 // test main
