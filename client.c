@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
         limpar_console();
         show_board(game.board);
         printf("Digite a posição X-Y: ");
-        scanf("%d%d", &height, &width);
+        scanf("%d-%d", &height, &width);
         if(validateInput(height, width) == 0){ return -1;}
 
         limpar_console();
