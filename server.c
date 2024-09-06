@@ -12,9 +12,10 @@
 #include "connection.h"
 #include "tic_tac_toe.c"
 
-
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
+int main(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
         printf("Não foi especificado a porta do servidor\n");
         return 1;
     }
@@ -24,41 +25,73 @@ int main(int argc, char *argv[]) {
     int connected_sock;
     int sd = socket(AF_INET, SOCK_STREAM, 0);
     int s_opt = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
-    if (s_opt == SOCKET_ERR) {
+    if (s_opt == SOCKET_ERR)
+    {
         printf("Erro ao criar socket: %d\n", s_opt);
         return 1;
-    } 
+    }
     printf("Socket criado com sucesso: %d\n", sd);
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
-    int ret = bind(sd, (struct sockaddr *) &addr, sizeof(addr));
-    if (ret == SOCKET_ERR) {
+    int ret = bind(sd, (struct sockaddr *)&addr, sizeof(addr));
+    if (ret == SOCKET_ERR)
+    {
         printf("Erro ao registrar endereço: %d\n", ret);
         return 1;
     }
 
     ret = listen(sd, 10);
-    if (ret == SOCKET_ERR) {
+    if (ret == SOCKET_ERR)
+    {
         printf("Erro ao escutar requisições: %d\n", ret);
         return 1;
     }
 
-    for (int i = 0; i < 10; i++) {
-        connected_sock = accept(sd, NULL, NULL);
-        if (connected_sock == SOCKET_ERR) {
-            printf("Erro ao obter requisição: %d\n", connected_sock);
-            break;
-        }
-        for (int j = 0; j < 10; j++) {
-            msg_t msg;
-            read_play(connected_sock, &msg);
-            printf("Mensagem: %d-%d-%d-%d\n", msg.id, (int) msg.player, msg.h, msg.w);
-        }
-        close(connected_sock);
+    int height;
+    int width;
+    msg_t msg;
+    connected_sock = accept(sd, NULL, NULL);
+    if (connected_sock == SOCKET_ERR)
+    {
+        printf("Erro ao obter requisição: %d\n", connected_sock);
     }
 
+    int countJogada = 0;
+    game_t game;
+    init_game(&game);
+
+    limpar_console();
+    show_board(game.board);
+    while (true)
+    {
+        printf("\nAguardando jogada do adversario...\n");
+
+        // Receber Jogada
+        read_play(connected_sock, &msg);
+        printf("Mensagem: %d-%d-%d-%d\n", msg.id, (int)msg.player, msg.h, msg.w);
+        limpar_console();
+        play(&game, msg.h, msg.w);
+        show_board(game.board);
+
+        // Enviar Jogada
+        printf("Digite a posição X-Y: ");
+        scanf("%d%d", &height, &width);
+
+        if (validateInput(height, width) == 0)
+            return -1;
+
+        msg.id = countJogada++;
+        msg.player = PLAYER_X;
+        msg.h = height;
+        msg.w = width;
+        send_play(connected_sock, &msg);
+        limpar_console();
+        play(&game, msg.h, msg.w);
+        show_board(game.board);
+    }
+    close(connected_sock);
     close(sd);
 }
