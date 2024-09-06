@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         show_board(game.board);
 
         // Receber Jogada
-        printf("\nAguardando jogada do adversario...\n");
+        printf("\nAguardando jogada do adversario O...\n");
         read_play(sd, &msg);
         printf("Mensagem recebida: %d-%d-%d-%d\n", msg.id, (int)msg.player, msg.h, msg.w);
         limpar_console();

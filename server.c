@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     show_board(game.board);
     while (true)
     {
-        printf("\nAguardando jogada do adversario...\n");
+        printf("\nAguardando jogada do adversario X...\n");
 
         // Receber Jogada
         read_play(connected_sock, &msg);
