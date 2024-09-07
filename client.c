@@ -69,6 +69,10 @@ int main(int argc, char *argv[])
         play(&game, msg.h, msg.w);
         limpar_console();
         show_board(game.board);
+        if (wins(&game)) {
+            printf("Você perdeu!\n");
+            break;
+        }
 
         // Enviar Jogada
         printf("Digite a posição X-Y: ");
@@ -89,7 +93,10 @@ int main(int argc, char *argv[])
         send_play(sd, &msg);
         limpar_console();
         show_board(game.board);
-
+        if (wins(&game)) {
+            printf("Você venceu!\n");
+            break;
+        }
     }
     close(sd);
 }

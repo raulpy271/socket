@@ -88,6 +88,10 @@ int main(int argc, char *argv[])
         limpar_console();
         show_board(game.board);
         send_play(connected_sock, &msg);
+        if (wins(&game)) {
+            printf("Você venceu!\n");
+            break;
+        }
 
         printf("\nAguardando jogada do adversario O...\n");
         if (read_play(connected_sock, &msg) == SOCKET_ERR) {
@@ -102,6 +106,10 @@ int main(int argc, char *argv[])
         play(&game, msg.h, msg.w);
         limpar_console();
         show_board(game.board);
+        if (wins(&game)) {
+            printf("Você perdeu!\n");
+            break;
+        }
     }
     close(connected_sock);
     close(sd);
