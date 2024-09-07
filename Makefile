@@ -1,4 +1,6 @@
 
+all: client.out server.out
+
 client.out: client.c tic_tac_toe.c connection.h
 	gcc client.c -o client.out
 

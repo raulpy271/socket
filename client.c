@@ -57,7 +57,15 @@ int main(int argc, char *argv[])
     {   
         // Receber Jogada
         printf("\nAguardando jogada do adversario X...\n");
-        read_play(sd, &msg);
+        if (read_play(sd, &msg) == SOCKET_ERR) {
+            printf("Erro ao ler socket\n");
+            break;
+        };
+        if (countJogadas + 1 != msg.id) {
+            printf("Identificador de mensagem inválido\n");
+            break;
+        }
+        countJogadas++;
         play(&game, msg.h, msg.w);
         limpar_console();
         show_board(game.board);
@@ -65,14 +73,20 @@ int main(int argc, char *argv[])
         // Enviar Jogada
         printf("Digite a posição X-Y: ");
         scanf("%d-%d", &height, &width);
-        if(validateInput(height, width) == 0){ return -1;}
+        if(TTT_ERROR == validateInput(height, width)){
+            printf("Input inválido\n");
+            break;
+        }
 
         msg.player = PLAYER_O;
-        msg.id = countJogadas++;
+        msg.id = ++countJogadas;
         msg.h = height;
         msg.w = width;
+        if (play(&game, msg.h, msg.w) == TTT_ERROR) {
+            printf("Input inválido\n");
+            break;
+        }
         send_play(sd, &msg);
-        play(&game, msg.h, msg.w);
         limpar_console();
         show_board(game.board);
 
