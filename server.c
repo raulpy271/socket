@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         printf("Erro ao obter requisição: %d\n", connected_sock);
     }
 
-    int countJogada = 0;
+    int countJogadas = 0;
     game_t game;
     init_game(&game);
 
@@ -72,24 +72,46 @@ int main(int argc, char *argv[])
         printf("Digite a posição X-Y: ");
         scanf("%d-%d", &height, &width);
 
-        if (validateInput(height, width) == 0)
-            return -1;
+        if (validateInput(height, width) == TTT_ERROR) {
+            printf("Input inválido\n");
+            break;
+        }
 
-        msg.id = countJogada++;
+        msg.id = ++countJogadas;
         msg.player = PLAYER_X;
         msg.h = height;
         msg.w = width;
-        play(&game, msg.h, msg.w);
+        if (play(&game, msg.h, msg.w) == TTT_ERROR) {
+            printf("Input inválido\n");
+            break;
+        }
         limpar_console();
         show_board(game.board);
         send_play(connected_sock, &msg);
+        if (wins(&game)) {
+            printf("Você venceu!\n");
+            break;
+        }
 
         printf("\nAguardando jogada do adversario O...\n");
-        read_play(connected_sock, &msg);
+        if (read_play(connected_sock, &msg) == SOCKET_ERR) {
+            printf("Erro ao ler socket\n");
+            break;
+        };
+        if (countJogadas + 1 != msg.id) {
+            printf("Identificador de mensagem inválido\n");
+            break;
+        }
+        countJogadas++;
         play(&game, msg.h, msg.w);
         limpar_console();
         show_board(game.board);
+        if (wins(&game)) {
+            printf("Você perdeu!\n");
+            break;
+        }
     }
     close(connected_sock);
     close(sd);
 }
+
